@@ -1,4 +1,4 @@
-function redirect(req, res) {
+const redirect = (req, res) => {
   if (res.headersSent) return
 
   res.setHeader('content-length', 0)
@@ -10,4 +10,4 @@ function redirect(req, res) {
   res.status(302).end()
 }
 
-module.exports = redirect
+export default redirect

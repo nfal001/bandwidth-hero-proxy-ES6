@@ -1,4 +1,4 @@
-function copyHeaders(source, target) {
+export function copyHeaders(source, target) {
   for (const [key, value] of Object.entries(source.headers)) {
     try {
       target.setHeader(key, value)
@@ -8,4 +8,3 @@ function copyHeaders(source, target) {
   }
 }
 
-module.exports = copyHeaders

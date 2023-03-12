@@ -1,8 +1,8 @@
-const auth = require('basic-auth')
+import auth from 'basic-auth'
 const LOGIN = process.env.LOGIN
 const PASSWORD = process.env.PASSWORD
 
-function authenticate(req, res, next) {
+const authenticate = (req, res, next) => {
   if (LOGIN && PASSWORD) {
     const credentials = auth(req)
     if (!credentials || credentials.name !== LOGIN || credentials.pass !== PASSWORD) {
@@ -15,4 +15,4 @@ function authenticate(req, res, next) {
   next()
 }
 
-module.exports = authenticate
+export default authenticate

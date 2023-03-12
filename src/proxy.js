@@ -1,43 +1,59 @@
-const request = require('request')
-const pick = require('lodash').pick
-const shouldCompress = require('./shouldCompress')
-const redirect = require('./redirect')
-const compress = require('./compress')
-const bypass = require('./bypass')
-const copyHeaders = require('./copyHeaders')
+import got from "got";
+import _ from "lodash";
+import { shouldCompress } from "./shouldCompress.js";
+import { compress } from "./compress.js";
+import { bypass } from "./bypass.js";
+import { copyHeaders } from "./copyHeaders.js";
+import redirect from "./redirect.js";
+import { CookieJar } from "tough-cookie";
 
-function proxy(req, res) {
-  request.get(
-    req.params.url,
-    {
+const cookieJar = new CookieJar();
+const { pick } = _;
+
+async function proxy(req, res) {
+  try {
+    const gotOptions = {
       headers: {
-        ...pick(req.headers, ['cookie', 'dnt', 'referer']),
-        'user-agent': 'Bandwidth-Hero Compressor',
-        'x-forwarded-for': req.headers['x-forwarded-for'] || req.ip,
-        via: '1.1 bandwidth-hero'
+        ...pick(req.headers, ["cookie", "dnt", "referer"]),
+        "user-agent": "Bandwidth-Hero Compressor",
+        "x-forwarded-for": req.headers["x-forwarded-for"] || req.ip,
+        via: "1.1 bandwidth-hero",
       },
-      timeout: 10000,
+      https: {
+        rejectUnauthorized: false,
+      },
       maxRedirects: 5,
-      encoding: null,
-      strictSSL: false,
-      gzip: true,
-      jar: true
-    },
-    (err, origin, buffer) => {
-      if (err || origin.statusCode >= 400) return redirect(req, res)
+      decompress: true,
+      cookieJar,
+    };
+    console.log('\n', gotOptions.headers,'\n')
+    const request = await got.get(req.params.url, gotOptions);
+    
+    const buffer = request.rawBody;    
+    
+    if (request.statusCode >= 400 || !request.headers['content-type'].startsWith('image')) {
+      // console.log(request.statusCode, request.headers['content-type'])
+      throw Error(`content-type was ${request.headers['content-type']} expected content type "image/*" , status code ${request.statusCode}`)
+    };
+    
+    console.log("\nfetch data: ", request.statusCode, request.statusMessage, '\n');
 
-      copyHeaders(origin, res)
-      res.setHeader('content-encoding', 'identity')
-      req.params.originType = origin.headers['content-type'] || ''
-      req.params.originSize = buffer.length
+    copyHeaders(request, res);
+    res.setHeader("content-encoding", "identity");
+    req.params.originType = request.headers["content-type"] || "";
+    req.params.originSize = buffer.length;
 
-      if (shouldCompress(req)) {
-        compress(req, res, buffer)
-      } else {
-        bypass(req, res, buffer)
-      }
+    console.log(shouldCompress(req), "begin compress! \n");
+
+    if (shouldCompress(req)) {
+      compress(req, res, buffer);
+    } else {
+      bypass(req, res, buffer);
     }
-  )
+  } catch (error) {
+    console.log("some error", error, '\n');
+    return redirect(req, res);
+  }
 }
 
-module.exports = proxy
+export default proxy;
