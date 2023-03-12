@@ -11,6 +11,4 @@ fly without saving images on disk.
 This is **NOT** an anonymizing proxy &mdash; it downloads images on user's behalf, passing cookies
 and user's IP address through to the origin host.
 
-## Deployment
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/SSL-ACTX/Site-01/tree/main/JavaScript/BH-1-Fork)
+[//]: <> (## Deployment)
