@@ -9,6 +9,8 @@ const app = express()
 
 const PORT = process.env.PORT || 8080
 
+app.get('*', 'use root endpoint pls')
+
 app.enable('trust proxy')
 app.get('/', authenticate, params, proxy)
 app.get('/favicon.ico', (req, res) => res.status(204).end())
