@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 'use strict'
 import 'dotenv/config'
+import helmet from 'helmet'
 import crypto from 'crypto'
 import express from 'express'
-import authenticate from './src/authenticate.js'
-import { params } from './src/params.js'
-import proxy from './src/proxy.js'
+import authenticate from './src/features/image_proxy/middleware/authenticate.js'
+import { params } from './src/features/image_proxy/middleware/params.js'
+import proxy from './src/features/image_proxy/proxy.js'
 
 const app = express()
 
@@ -14,6 +15,7 @@ const LISTENTOIP = process.argv.includes('--expose') ? '0.0.0.0' : '127.0.0.1'
 const clusterNode = crypto.randomBytes(4).toString('hex');
 
 app.enable('trust proxy')
+app.use(helmet())
 
 app.use((_req,res,next) =>{
     res.setHeader('x-node-serial',clusterNode);

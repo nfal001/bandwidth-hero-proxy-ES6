@@ -18,5 +18,3 @@ export function shouldCompress(req) {
 
   return true
 }
-
-// module.exports = shouldCompress
