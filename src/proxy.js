@@ -32,7 +32,6 @@ async function proxy(req, res) {
     const buffer = request.rawBody;    
     
     if (request.statusCode >= 400 || !request.headers['content-type'].startsWith('image')) {
-      // console.log(request.statusCode, request.headers['content-type'])
       throw Error(`content-type was ${request.headers['content-type']} expected content type "image/*" , status code ${request.statusCode}`)
     };
     
