@@ -27,20 +27,29 @@ async function proxy(req, res) {
       decompress: true,
       cookieJar,
       timeout: {
-        response: 600
+        response: 6600 // ms
       }
     };
-    
-    // console.log('\n', gotOptions.headers,'\n')
 
     const fetchImg = got.get(req.params.url, {...gotOptions});
 
-    // fetchImg.on('downloadProgress',(progress)=>{
-    //   console.log(progress.percent);
-    // })
-
     const request = await fetchImg;
-    const buffer = request.rawBody;    
+    const buffer = request.rawBody; 
+    
+    // clean-up response header genereted by cf
+    [
+      'cf-cache-status',
+      'cf-ray',
+      'cf-request-id',
+      'date',
+      'server','report-to',
+      'nel','report-policy',
+      'cf-polished','cf-bgj',
+      'age','server','expires',
+      'strict-transport-security',
+      'etag','expires','last-modified',
+      'nel'
+    ].forEach((k)=> delete request.headers[k])
 
     validateResponse(request)
 
@@ -49,8 +58,6 @@ async function proxy(req, res) {
     res.setHeader("content-encoding", "identity");
     req.params.originType = request.headers["content-type"] || "";
     req.params.originSize = buffer.length;
-
-    // console.log(shouldCompress(req), "begin compress! \n");
 
     if (shouldCompress(req)) {
       compress(req, res, buffer);
