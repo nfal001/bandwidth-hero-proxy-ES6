@@ -31,25 +31,25 @@ async function proxy(req, res) {
       }
     };
 
-    const fetchImg = got.get(req.params.url, {...gotOptions});
+    const fetchImg = got.get(req.params.url, { ...gotOptions });
 
     const request = await fetchImg;
-    const buffer = request.rawBody; 
-    
+    const buffer = request.rawBody;
+
     // clean-up response header genereted by cf
     [
       'cf-cache-status',
       'cf-ray',
       'cf-request-id',
       'date',
-      'server','report-to',
-      'nel','report-policy',
-      'cf-polished','cf-bgj',
-      'age','server','expires',
+      'server', 'report-to',
+      'nel', 'report-policy',
+      'cf-polished', 'cf-bgj',
+      'age', 'server', 'expires',
       'strict-transport-security',
-      'etag','expires','last-modified',
+      'etag', 'expires', 'last-modified',
       'nel'
-    ].forEach((k)=> delete request.headers[k])
+    ].forEach((k) => delete request.headers[k])
 
     validateResponse(request)
 
@@ -65,10 +65,10 @@ async function proxy(req, res) {
       bypass(req, res, buffer);
     }
   } catch (error) {
-    if (error instanceof RequestError){
-      // console.log(error);
-      return res.status(503).end('request time out','ascii');
-    } 
+    if (error instanceof RequestError) {
+      console.log(error);
+      return res.status(503).end('request time out', 'ascii');
+    }
     console.log("some error", error, '\n');
     return redirect(req, res);
   }
@@ -78,6 +78,6 @@ const validateResponse = (res) => {
   if (res.statusCode >= 400 || !res.headers['content-type'].startsWith('image')) {
     throw Error(`content-type was ${res.headers['content-type']} expected content type "image/*" , status code ${res.statusCode}`)
   };
-} 
+}
 
 export default proxy;

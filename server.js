@@ -19,32 +19,32 @@ app.enable('trust proxy')
 app.use(helmet())
 
 // http://hostname/r?jpg=0&l=70&bw=0&url=https://server.image/wp-content/img/T/The-Ghostly-Doctor/477/07.jpg
-app.get('/r', (req,res) => {
+app.get('/r', (req, res) => {
     try {
         const parsedURLfromURL = new URL(req.query.url)
         const cachingPath = `${parsedURLfromURL.hostname}${parsedURLfromURL.pathname}`
+        res.redirect(url.format({
+            pathname: `/_static/${cachingPath}`,
+            query: req.query
+        }))
     } catch (e) {
         if (e instanceof TypeError) res.status(404).end('bandwidth hero proxy')
     }
-    res.redirect(url.format({
-        pathname: `/_static/${cachingPath}`,
-        query: req.query
-    }))
 });
 
-app.use((_req,res,next) =>{
-    res.setHeader('x-node-serial',clusterNode);
+app.use((_req, res, next) => {
+    res.setHeader('x-node-serial', clusterNode);
     next()
 })
 
-app.get('/_static/*',authenticate, params, proxy)
+app.get('/_static/*', authenticate, params, proxy)
 
 app.get('/favicon.ico', (_req, res) => res.status(204).end())
 
 // deprecated
-app.get('/',authenticate, params, proxy)
+app.get('/', authenticate, params, proxy)
 
 
-app.get('*', (_req,res)=> res.status(404).end('use root / r path','ascii'))
+app.get('*', (_req, res) => res.status(404).end('use root / r path', 'ascii'))
 
 app.listen(PORT, LISTENTOIP, () => console.log(`Listening on http://127.0.0.1:${PORT}`))
