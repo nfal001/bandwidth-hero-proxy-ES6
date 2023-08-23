@@ -8,6 +8,7 @@ import authenticate from './src/features/image_proxy/middleware/authenticate.js'
 import { params } from './src/features/image_proxy/middleware/params.js'
 import proxy from './src/features/image_proxy/proxy.js'
 import url from 'url'
+import _ from 'lodash'
 
 const app = express()
 
@@ -23,9 +24,12 @@ app.get('/r', (req, res) => {
     try {
         const parsedURLfromURL = new URL(req.query.url)
         const cachingPath = `${parsedURLfromURL.hostname}${parsedURLfromURL.pathname}`
+
+        const queryNeeded = { ..._.pick(req.headers, ["cookie", "dnt", "referer"]) }
+
         res.redirect(url.format({
             pathname: `/_static/${cachingPath}`,
-            query: req.query
+            query: { ...req.query, ...queryNeeded }
         }))
     } catch (e) {
         if (e instanceof TypeError) res.status(404).end('bandwidth hero proxy')
@@ -37,7 +41,12 @@ app.use((_req, res, next) => {
     next()
 })
 
-app.get('/_static/*', authenticate, params, proxy)
+app.get('/_static/*', (req, _res, next) => {
+    const queryNeeded = { ..._.pick(req.query, ["cookie", "dnt", "referer"]) }
+    _.forOwn(queryNeeded, (value, key) => req.headers[key] = value)
+    next()
+},
+    authenticate, params, proxy)
 
 app.get('/favicon.ico', (_req, res) => res.status(204).end())
 
