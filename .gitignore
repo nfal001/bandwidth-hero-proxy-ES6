@@ -2,3 +2,4 @@
 node_modules
 ecosystem.js
 .env
+tmp
