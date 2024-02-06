@@ -2,7 +2,7 @@ import got, { RequestError } from "got";
 import { randomMobileUA } from '../../utils/ua.js'
 import _ from "lodash";
 import { shouldCompress } from "./middleware/shouldCompress.js";
-import { compress } from "./services/compress.js";
+import { compress } from "../../services/compress.js";
 import { bypass } from "./bypass.js";
 import { copyHeaders } from "../../utils/copyHeaders.js";
 import redirect from "./redirect.js";
@@ -11,6 +11,11 @@ import { CookieJar } from "tough-cookie";
 const cookieJar = new CookieJar();
 const { pick } = _;
 
+/**
+ * 
+ * @param {import('express').Request} req 
+ * @param {import('express').Request} res 
+ */
 async function proxy(req, res) {
   try {
     const gotOptions = {
@@ -35,9 +40,12 @@ async function proxy(req, res) {
 
     const request = await fetchImg;
     const buffer = request.rawBody;
+    
+    console.log("[DOWNLOAD] fetch Image from server " + req.path, request.statusCode >= 400 ? request.rawBody : request.statusCode)
 
     // clean-up response header genereted by cf
-    [
+    console.log("[CLEAN] cleaning up cf-headers " + req.path)
+    const cfHeaders = [
       'cf-cache-status',
       'cf-ray',
       'cf-request-id',
@@ -47,12 +55,19 @@ async function proxy(req, res) {
       'cf-polished', 'cf-bgj',
       'age', 'server', 'expires',
       'strict-transport-security',
-      'etag', 'expires', 'last-modified',
-      'nel'
-    ].forEach((k) => delete request.headers[k])
+      'etag', 'expires', 'last-modified'
+    ]
+
+    cfHeaders.forEach(k=>{
+      if(request.headers && request.headers[k]){
+        delete request.headers[k]
+      }
+    })
+    
+    
+    console.log("[CLEANED] cf-headers cleaned " + req.path)
 
     validateResponse(request)
-
     copyHeaders(request, res);
 
     res.setHeader("content-encoding", "identity");
@@ -69,7 +84,7 @@ async function proxy(req, res) {
       console.log(error);
       return res.status(503).end('request time out', 'ascii');
     }
-    console.log("some error", error, '\n');
+    console.log("some error on " + req.path + "\n", error, '\n');
     return redirect(req, res);
   }
 }

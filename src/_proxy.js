@@ -6,7 +6,6 @@ import { compress } from "./features/imageProxy/services/compress.js";
 import { bypass } from "./bypass.js";
 import { copyHeaders } from "./copyHeaders.js";
 import redirect from "./features/imageProxy/redirect.js";
-import { CookieJar } from "tough-cookie";
 
 const cookieJar = new CookieJar();
 const { pick } = _;
@@ -25,10 +24,7 @@ async function proxy(req, res) {
       },
       maxRedirects: 5,
       decompress: true,
-      cookieJar
     };
-    
-    // console.log('\n', gotOptions.headers,'\n')
 
     const fetchImg = got.get(req.params.url, {...gotOptions});
 
@@ -46,15 +42,18 @@ async function proxy(req, res) {
 
     // console.log(shouldCompress(req), "begin compress! \n");
 
-    if (shouldCompress(req)) {
-      compress(req, res, buffer);
-    } else {
-      bypass(req, res, buffer);
-    }
+    const compressImg = 
   } catch (error) {
     console.log("some error", error, '\n');
     return redirect(req, res);
   }
+}
+
+const compressImage = (req,res, buffer) => {
+  if (shouldCompress(req)) {
+    return compress(req, res, buffer);
+  }
+  return bypass(req, res, buffer);
 }
 
 const validateResponse = (res) => {

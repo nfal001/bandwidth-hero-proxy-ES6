@@ -1,5 +1,7 @@
-const MIN_COMPRESS_LENGTH = 1024
-const MIN_TRANSPARENT_COMPRESS_LENGTH = MIN_COMPRESS_LENGTH * 100
+import config from "../../../config/config.js"
+
+const MIN_COMPRESS_LENGTH = config.compression.minCompressLength
+const MIN_TRANSPARENT_COMPRESS_LENGTH = config.compression.minTransparentCompressLength
 
 export function shouldCompress(req) {
   

@@ -1,4 +1,4 @@
-const DEFAULT_QUALITY = 40
+import config from "../../../config/config.js"
 
 export function params(req, res, next) {
   let url = req.query.url
@@ -10,7 +10,7 @@ export function params(req, res, next) {
   req.params.url = url
   req.params.webp = !parseInt(req.query.jpg) ?? !req.query.jpeg
   req.params.grayscale = req.query.bw != 0
-  req.params.quality = parseInt(req.query.l, 10) || DEFAULT_QUALITY
+  req.params.quality = parseInt(req.query.l, 10) || config.compression.defaultQuality
 
   next()
 }
