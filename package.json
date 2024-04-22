@@ -9,7 +9,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build-cjs": "esbuild ./server.js --platform=node --target=node20.10 --outfile=dist/server.dist.js --bundle --format=cjs"
   },
   "dependencies": {
     "basic-auth": "^2.0.1",
@@ -24,5 +25,8 @@
   "engines": {
     "node": ">=20.x"
   },
-  "packageManager": "yarn@4.0.2"
+  "packageManager": "yarn@4.0.2",
+  "devDependencies": {
+    "esbuild": "^0.20.2"
+  }
 }

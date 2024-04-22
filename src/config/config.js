@@ -9,7 +9,7 @@ export default {
     compression:{
         minCompressLength: process.env.MIN_COMPRESS_LENGTH || 1024,
         minTransparentCompressLength: process.env.MIN_COMPRESS_LENGTH * 100,
-        defaultQuality: process.env.DEFAULT_QUALITY || 40
+        defaultQuality: process.env.DEFAULT_QUALITY || 60
     },
     isAuthRequired: LOGIN && PASSWORD
 }
