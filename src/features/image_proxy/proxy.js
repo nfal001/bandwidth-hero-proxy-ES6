@@ -55,7 +55,8 @@ async function proxy(req, res) {
       'cf-polished', 'cf-bgj',
       'age', 'server', 'expires',
       'strict-transport-security',
-      'etag', 'expires', 'last-modified'
+      'etag', 'expires', 'last-modified',
+      'transfer-encoding'
     ]
 
     cfHeaders.forEach(k=>{
